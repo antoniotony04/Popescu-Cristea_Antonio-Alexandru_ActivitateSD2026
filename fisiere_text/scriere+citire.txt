@@ -1,0 +1,22 @@
+#include <stdio.h>
+
+int main() {
+    FILE *f;
+
+    // scriere
+    f = fopen("date.txt", "w");
+    fprintf(f, "Ana 10\nIon 9\n");
+    fclose(f);
+
+    // citire
+    f = fopen("date.txt", "r");
+    char nume[50];
+    int nota;
+
+    while (fscanf(f, "%s %d", nume, &nota) != EOF) {
+        printf("%s %d\n", nume, nota);
+    }
+
+    fclose(f);
+    return 0;
+}

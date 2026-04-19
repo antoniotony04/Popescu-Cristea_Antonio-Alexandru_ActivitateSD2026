@@ -1,0 +1,19 @@
+#include <stdio.h>
+
+typedef struct {
+    char nume[50];
+    int nota;
+} Student;
+
+int main() {
+    FILE *f = fopen("studenti.bin", "wb");
+
+    Student s1 = {"Ana", 10};
+    Student s2 = {"Ion", 9};
+
+    fwrite(&s1, sizeof(Student), 1, f);
+    fwrite(&s2, sizeof(Student), 1, f);
+
+    fclose(f);
+    return 0;
+}

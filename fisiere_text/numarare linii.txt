@@ -1,0 +1,15 @@
+#include <stdio.h>
+
+int main() {
+    FILE *f = fopen("date.txt", "r");
+    char c;
+    int linii = 0;
+
+    while ((c = fgetc(f)) != EOF) {
+        if (c == '\n') linii++;
+    }
+
+    fclose(f);
+    printf("Linii: %d", linii);
+    return 0;
+}

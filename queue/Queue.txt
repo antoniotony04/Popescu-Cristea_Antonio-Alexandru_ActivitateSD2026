@@ -1,0 +1,13 @@
+#include <stdio.h>
+#define MAX 100
+
+int queue[MAX];
+int front = 0, rear = -1;
+
+void enqueue(int x) {
+    queue[++rear] = x;
+}
+
+int dequeue() {
+    return queue[front++];
+}

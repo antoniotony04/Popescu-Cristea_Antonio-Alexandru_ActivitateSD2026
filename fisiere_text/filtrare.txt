@@ -1,0 +1,19 @@
+#include <stdio.h>
+
+int main() {
+    FILE *f = fopen("date.txt", "r");
+    FILE *g = fopen("top.txt", "w");
+
+    char nume[50];
+    int nota;
+
+    while (fscanf(f, "%s %d", nume, &nota) != EOF) {
+        if (nota >= 9) {
+            fprintf(g, "%s %d\n", nume, nota);
+        }
+    }
+
+    fclose(f);
+    fclose(g);
+    return 0;
+}

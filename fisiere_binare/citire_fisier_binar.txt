@@ -1,0 +1,18 @@
+#include <stdio.h>
+
+typedef struct {
+    char nume[50];
+    int nota;
+} Student;
+
+int main() {
+    FILE *f = fopen("studenti.bin", "rb");
+    Student s;
+
+    while (fread(&s, sizeof(Student), 1, f)) {
+        printf("%s %d\n", s.nume, s.nota);
+    }
+
+    fclose(f);
+    return 0;
+}

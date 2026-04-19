@@ -1,0 +1,21 @@
+#include <stdio.h>
+
+void quicksort(int v[], int st, int dr) {
+    int i = st, j = dr;
+    int pivot = v[(st + dr) / 2];
+
+    while (i <= j) {
+        while (v[i] < pivot) i++;
+        while (v[j] > pivot) j--;
+
+        if (i <= j) {
+            int temp = v[i];
+            v[i] = v[j];
+            v[j] = temp;
+            i++; j--;
+        }
+    }
+
+    if (st < j) quicksort(v, st, j);
+    if (i < dr) quicksort(v, i, dr);
+}
