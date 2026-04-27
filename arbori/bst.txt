@@ -1,0 +1,42 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Nod {
+    int val;
+    struct Nod* st;
+    struct Nod* dr;
+} Nod;
+
+Nod* creare(int val) {
+    Nod* n = (Nod*)malloc(sizeof(Nod));
+    n->val = val;
+    n->st = n->dr = NULL;
+    return n;
+}
+
+Nod* insert(Nod* rad, int val) {
+    if (!rad) return creare(val);
+    if (val < rad->val)
+        rad->st = insert(rad->st, val);
+    else
+        rad->dr = insert(rad->dr, val);
+    return rad;
+}
+
+void inorder(Nod* rad) {
+    if (rad) {
+        inorder(rad->st);
+        printf("%d ", rad->val);
+        inorder(rad->dr);
+    }
+}
+
+int main() {
+    Nod* rad = NULL;
+    rad = insert(rad, 5);
+    rad = insert(rad, 3);
+    rad = insert(rad, 7);
+
+    inorder(rad);
+    return 0;
+}
