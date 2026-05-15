@@ -1,0 +1,74 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Facultate\\Anul 3\\ASE\\Semestrul 2\\SDD_Learning\\InvatareSDD\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{290717CB-9C1F-4962-A56F-49DDEFCCDEF3}|InvatareSDD\\InvatareSDD.vcxproj|D:\\Facultate\\Anul 3\\ASE\\Semestrul 2\\SDD_Learning\\InvatareSDD\\InvatareSDD\\fisier_invatare.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{290717CB-9C1F-4962-A56F-49DDEFCCDEF3}|InvatareSDD\\InvatareSDD.vcxproj|solutionrelative:InvatareSDD\\fisier_invatare.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{290717CB-9C1F-4962-A56F-49DDEFCCDEF3}|InvatareSDD\\InvatareSDD.vcxproj|D:\\Facultate\\Anul 3\\ASE\\Semestrul 2\\SDD_Learning\\InvatareSDD\\InvatareSDD\\sursa.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{290717CB-9C1F-4962-A56F-49DDEFCCDEF3}|InvatareSDD\\InvatareSDD.vcxproj|solutionrelative:InvatareSDD\\sursa.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 5,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{be4d7042-ba3f-11d2-840e-00c04f9902c1}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{ecb7191a-597b-41f5-9843-03a4cf275dde}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "fisier_invatare.c",
+              "DocumentMoniker": "D:\\Facultate\\Anul 3\\ASE\\Semestrul 2\\SDD_Learning\\InvatareSDD\\InvatareSDD\\fisier_invatare.c",
+              "RelativeDocumentMoniker": "InvatareSDD\\fisier_invatare.c",
+              "ToolTip": "D:\\Facultate\\Anul 3\\ASE\\Semestrul 2\\SDD_Learning\\InvatareSDD\\InvatareSDD\\fisier_invatare.c",
+              "RelativeToolTip": "InvatareSDD\\fisier_invatare.c",
+              "ViewState": "AgIAAJIAAAAAAAAAAAAswIEAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
+              "WhenOpened": "2026-05-15T15:26:33.06Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "sursa.c",
+              "DocumentMoniker": "D:\\Facultate\\Anul 3\\ASE\\Semestrul 2\\SDD_Learning\\InvatareSDD\\InvatareSDD\\sursa.c",
+              "RelativeDocumentMoniker": "InvatareSDD\\sursa.c",
+              "ToolTip": "D:\\Facultate\\Anul 3\\ASE\\Semestrul 2\\SDD_Learning\\InvatareSDD\\InvatareSDD\\sursa.c",
+              "RelativeToolTip": "InvatareSDD\\sursa.c",
+              "ViewState": "AgIAAGIAAAAAAAAAAAAswH0AAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
+              "WhenOpened": "2026-05-15T14:00:40.254Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

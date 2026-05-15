@@ -1,0 +1,5 @@
+10,4,25000.5,BMW,George,A
+5,2,18000.0,Audi,Ion,B
+20,5,32000.99,Mercedes,Popescu,C
+15,4,22000.75,Volkswagen,Maria,D
+8,3,15000.0,Ford,Andrei,E

@@ -1,0 +1,5 @@
+﻿  fisier_invatare.c
+  sursa.c
+  Generating Code...
+D:\Facultate\Anul 3\ASE\Semestrul 2\SDD_Learning\InvatareSDD\InvatareSDD\fisier_invatare.c(36,15): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+  InvatareSDD.vcxproj -> D:\Facultate\Anul 3\ASE\Semestrul 2\SDD_Learning\InvatareSDD\x64\Debug\InvatareSDD.exe
