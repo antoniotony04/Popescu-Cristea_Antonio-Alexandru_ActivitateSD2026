@@ -1,0 +1,533 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+    int   id;
+    char* nume;
+    int   grupa;
+    float medie;
+} Student;
+
+Student initStudent(int id, const char* nume, int grupa, float medie) {
+    Student s;
+    s.id    = id;
+    s.grupa = grupa;
+    s.medie = medie;
+    s.nume  = (char*)malloc(strlen(nume) + 1);
+    strcpy(s.nume, nume);
+    return s;
+}
+
+void afisareStudent(Student s) {
+    printf("  ID: %d | Nume: %-20s | Grupa: %d | Medie: %.2f\n",
+           s.id, s.nume, s.grupa, s.medie);
+}
+
+Student citireStudentDinFisier(FILE* f) {
+    char  buffer[200];
+    char  sep[] = ",\n";
+    fgets(buffer, sizeof(buffer), f);
+    Student s;
+    char* tok;
+    tok    = strtok(buffer, sep);
+    s.id   = atoi(tok);
+    tok    = strtok(NULL, sep);
+    s.nume = (char*)malloc(strlen(tok) + 1);
+    strcpy(s.nume, tok);
+    tok     = strtok(NULL, sep);
+    s.grupa = atoi(tok);
+    tok     = strtok(NULL, sep);
+    s.medie = (float)atof(tok);
+    return s;
+}
+
+void freeStudent(Student* s) {
+    free(s->nume);
+    s->nume = NULL;
+}
+
+void scrieStudentiInFisier(const char* numeFisier, Student* arr, int n) {
+    FILE* f = fopen(numeFisier, "w");
+    if (!f) { printf("Eroare la deschiderea fisierului!\n"); return; }
+    for (int i = 0; i < n; i++)
+        fprintf(f, "%d,%s,%d,%.2f\n", arr[i].id, arr[i].nume, arr[i].grupa, arr[i].medie);
+    fclose(f);
+}
+
+
+#define HEAP_CAP 100
+
+typedef struct {
+    Student studenti[HEAP_CAP];
+    int     nrElemente;
+} Heap;
+
+Heap initHeap(void) {
+    Heap h;
+    h.nrElemente = 0;
+    return h;
+}
+
+void filtreazaHeapMax(Heap* h, int poz) {
+    int pozSt  = 2 * poz + 1;
+    int pozDr  = 2 * poz + 2;
+    int pozMax = poz;
+    if (pozSt < h->nrElemente && h->studenti[pozSt].medie > h->studenti[pozMax].medie)
+        pozMax = pozSt;
+    if (pozDr < h->nrElemente && h->studenti[pozDr].medie > h->studenti[pozMax].medie)
+        pozMax = pozDr;
+    if (pozMax != poz) {
+        Student tmp         = h->studenti[poz];
+        h->studenti[poz]    = h->studenti[pozMax];
+        h->studenti[pozMax] = tmp;
+        filtreazaHeapMax(h, pozMax);
+    }
+}
+
+void inserareHeap(Heap* h, Student s) {
+    if (h->nrElemente >= HEAP_CAP) { printf("Heap plin!\n"); return; }
+    h->studenti[h->nrElemente] = s;
+    int i = h->nrElemente++;
+    while (i > 0) {
+        int parinte = (i - 1) / 2;
+        if (h->studenti[i].medie > h->studenti[parinte].medie) {
+            Student tmp          = h->studenti[i];
+            h->studenti[i]       = h->studenti[parinte];
+            h->studenti[parinte] = tmp;
+            i = parinte;
+        } else break;
+    }
+}
+
+Heap construiesteHeapDinFisier(const char* numeFisier) {
+    Heap h = initHeap();
+    FILE* f = fopen(numeFisier, "r");
+    if (!f) { printf("Fisier inexistent: %s\n", numeFisier); return h; }
+    while (!feof(f))
+        h.studenti[h.nrElemente++] = citireStudentDinFisier(f);
+    fclose(f);
+    for (int i = (h.nrElemente - 2) / 2; i >= 0; i--)
+        filtreazaHeapMax(&h, i);
+    return h;
+}
+
+Student extrageMaxim(Heap* h) {
+    Student gol = {-1, NULL, 0, 0};
+    if (h->nrElemente == 0) return gol;
+    Student maxim          = h->studenti[0];
+    h->studenti[0]         = h->studenti[--h->nrElemente];
+    filtreazaHeapMax(h, 0);
+    return maxim;
+}
+
+void afisareHeap(Heap* h) {
+    printf("  [Heap — %d studenti, radacina = medie maxima]\n", h->nrElemente);
+    for (int i = 0; i < h->nrElemente; i++)
+        afisareStudent(h->studenti[i]);
+}
+
+void afisareTopK(Heap h, int k) {
+    printf("  [Top %d studenti dupa medie]\n", k);
+    for (int i = 0; i < k && h.nrElemente > 0; i++) {
+        Student s = extrageMaxim(&h);
+        printf("  #%d ", i + 1);
+        afisareStudent(s);
+    }
+}
+
+void dezalocareHeap(Heap* h) {
+    for (int i = 0; i < h->nrElemente; i++)
+        freeStudent(&h->studenti[i]);
+    h->nrElemente = 0;
+}
+
+
+typedef struct NodABC {
+    Student        info;
+    struct NodABC* st;
+    struct NodABC* dr;
+} NodABC;
+
+void inserareABC(NodABC** rad, Student s) {
+    if (*rad == NULL) {
+        NodABC* nou = (NodABC*)malloc(sizeof(NodABC));
+        nou->info = s;
+        nou->st = nou->dr = NULL;
+        *rad = nou;
+    } else if (s.id < (*rad)->info.id)
+        inserareABC(&(*rad)->st, s);
+    else if (s.id > (*rad)->info.id)
+        inserareABC(&(*rad)->dr, s);
+}
+
+NodABC* citireArboreDinFisier(const char* numeFisier) {
+    NodABC* rad = NULL;
+    FILE*   f   = fopen(numeFisier, "r");
+    if (!f) { printf("Fisier inexistent: %s\n", numeFisier); return NULL; }
+    while (!feof(f)) inserareABC(&rad, citireStudentDinFisier(f));
+    fclose(f);
+    return rad;
+}
+
+void inordineABC(NodABC* rad) {
+    if (rad) { inordineABC(rad->st); afisareStudent(rad->info); inordineABC(rad->dr); }
+}
+
+void preordineABC(NodABC* rad) {
+    if (rad) { afisareStudent(rad->info); preordineABC(rad->st); preordineABC(rad->dr); }
+}
+
+NodABC* cautareABC(NodABC* rad, int id) {
+    if (rad == NULL || rad->info.id == id) return rad;
+    if (id < rad->info.id) return cautareABC(rad->st, id);
+    return cautareABC(rad->dr, id);
+}
+
+void studentiDinGrupa(NodABC* rad, int grupa) {
+    if (rad) {
+        studentiDinGrupa(rad->st, grupa);
+        if (rad->info.grupa == grupa) afisareStudent(rad->info);
+        studentiDinGrupa(rad->dr, grupa);
+    }
+}
+
+float sumaMediaABC(NodABC* rad) {
+    if (!rad) return 0;
+    return rad->info.medie + sumaMediaABC(rad->st) + sumaMediaABC(rad->dr);
+}
+
+int numarNoduri(NodABC* rad) {
+    if (!rad) return 0;
+    return 1 + numarNoduri(rad->st) + numarNoduri(rad->dr);
+}
+
+float mediaGenerala(NodABC* rad) {
+    int n = numarNoduri(rad);
+    return (n == 0) ? 0 : sumaMediaABC(rad) / n;
+}
+
+int numarStudentiCuMedieMinima(NodABC* rad, float prag) {
+    if (!rad) return 0;
+    int ok = (rad->info.medie >= prag) ? 1 : 0;
+    return ok + numarStudentiCuMedieMinima(rad->st, prag) + numarStudentiCuMedieMinima(rad->dr, prag);
+}
+
+NodABC* minimDreapta(NodABC* nod) {
+    while (nod->st) nod = nod->st;
+    return nod;
+}
+
+NodABC* stergeNod(NodABC* rad, int id) {
+    if (!rad) return NULL;
+    if (id < rad->info.id)
+        rad->st = stergeNod(rad->st, id);
+    else if (id > rad->info.id)
+        rad->dr = stergeNod(rad->dr, id);
+    else {
+        if (!rad->st) { NodABC* tmp = rad->dr; freeStudent(&rad->info); free(rad); return tmp; }
+        if (!rad->dr) { NodABC* tmp = rad->st; freeStudent(&rad->info); free(rad); return tmp; }
+        NodABC* succesor = minimDreapta(rad->dr);
+        freeStudent(&rad->info);
+        rad->info = succesor->info;
+        char* numeClon = (char*)malloc(strlen(succesor->info.nume) + 1);
+        strcpy(numeClon, succesor->info.nume);
+        rad->info.nume = numeClon;
+        rad->dr = stergeNod(rad->dr, succesor->info.id);
+    }
+    return rad;
+}
+
+void dezalocareABC(NodABC** rad) {
+    if (*rad) {
+        dezalocareABC(&(*rad)->st);
+        dezalocareABC(&(*rad)->dr);
+        freeStudent(&(*rad)->info);
+        free(*rad);
+        *rad = NULL;
+    }
+}
+
+
+typedef struct NodAVL {
+    Student        info;
+    struct NodAVL* st;
+    struct NodAVL* dr;
+} NodAVL;
+
+int inaltimeAVL(NodAVL* rad) {
+    if (!rad) return 0;
+    int st = inaltimeAVL(rad->st);
+    int dr = inaltimeAVL(rad->dr);
+    return 1 + (st > dr ? st : dr);
+}
+
+int factorEchilibru(NodAVL* rad) {
+    if (!rad) return 0;
+    return inaltimeAVL(rad->st) - inaltimeAVL(rad->dr);
+}
+
+void rotireDreapta(NodAVL** rad) {
+    NodAVL* aux = (*rad)->st;
+    (*rad)->st  = aux->dr;
+    aux->dr     = *rad;
+    *rad        = aux;
+}
+
+void rotireStanga(NodAVL** rad) {
+    NodAVL* aux = (*rad)->dr;
+    (*rad)->dr  = aux->st;
+    aux->st     = *rad;
+    *rad        = aux;
+}
+
+void inserareAVL(NodAVL** rad, Student s) {
+    if (*rad == NULL) {
+        NodAVL* nou = (NodAVL*)malloc(sizeof(NodAVL));
+        nou->info = s;
+        nou->st = nou->dr = NULL;
+        *rad = nou;
+        return;
+    }
+    if (s.id < (*rad)->info.id)      inserareAVL(&(*rad)->st, s);
+    else if (s.id > (*rad)->info.id) inserareAVL(&(*rad)->dr, s);
+    else return;
+
+    int fe = factorEchilibru(*rad);
+    if (fe == 2) {
+        if (factorEchilibru((*rad)->st) == -1) rotireStanga(&(*rad)->st);
+        rotireDreapta(rad);
+    } else if (fe == -2) {
+        if (factorEchilibru((*rad)->dr) == 1) rotireDreapta(&(*rad)->dr);
+        rotireStanga(rad);
+    }
+}
+
+NodAVL* citireAVLDinFisier(const char* numeFisier) {
+    NodAVL* rad = NULL;
+    FILE*   f   = fopen(numeFisier, "r");
+    if (!f) { printf("Fisier inexistent: %s\n", numeFisier); return NULL; }
+    while (!feof(f)) inserareAVL(&rad, citireStudentDinFisier(f));
+    fclose(f);
+    return rad;
+}
+
+void inordineAVL(NodAVL* rad) {
+    if (rad) { inordineAVL(rad->st); afisareStudent(rad->info); inordineAVL(rad->dr); }
+}
+
+NodAVL* cautareAVL(NodAVL* rad, int id) {
+    if (!rad || rad->info.id == id) return rad;
+    if (id < rad->info.id) return cautareAVL(rad->st, id);
+    return cautareAVL(rad->dr, id);
+}
+
+int studentiInInterval(NodAVL* rad, float minM, float maxM) {
+    if (!rad) return 0;
+    int ok = (rad->info.medie >= minM && rad->info.medie <= maxM) ? 1 : 0;
+    return ok + studentiInInterval(rad->st, minM, maxM) + studentiInInterval(rad->dr, minM, maxM);
+}
+
+void dezalocareAVL(NodAVL** rad) {
+    if (*rad) {
+        dezalocareAVL(&(*rad)->st);
+        dezalocareAVL(&(*rad)->dr);
+        freeStudent(&(*rad)->info);
+        free(*rad);
+        *rad = NULL;
+    }
+}
+
+
+#define HASH_SIZE 13
+
+typedef struct NodHash {
+    Student         info;
+    struct NodHash* next;
+} NodHash;
+
+typedef struct {
+    NodHash* sloturi[HASH_SIZE];
+    int      nrElemente;
+} HashTable;
+
+int hashFunctie(int id) {
+    return id % HASH_SIZE;
+}
+
+HashTable initHashTable(void) {
+    HashTable ht;
+    ht.nrElemente = 0;
+    for (int i = 0; i < HASH_SIZE; i++) ht.sloturi[i] = NULL;
+    return ht;
+}
+
+void inserareHT(HashTable* ht, Student s) {
+    int poz      = hashFunctie(s.id);
+    NodHash* nou = (NodHash*)malloc(sizeof(NodHash));
+    nou->info    = s;
+    nou->next    = ht->sloturi[poz];
+    ht->sloturi[poz] = nou;
+    ht->nrElemente++;
+}
+
+HashTable citireHTDinFisier(const char* numeFisier) {
+    HashTable ht = initHashTable();
+    FILE* f = fopen(numeFisier, "r");
+    if (!f) { printf("Fisier inexistent: %s\n", numeFisier); return ht; }
+    while (!feof(f)) inserareHT(&ht, citireStudentDinFisier(f));
+    fclose(f);
+    return ht;
+}
+
+Student* cautareHT(HashTable* ht, int id) {
+    NodHash* cur = ht->sloturi[hashFunctie(id)];
+    while (cur) {
+        if (cur->info.id == id) return &cur->info;
+        cur = cur->next;
+    }
+    return NULL;
+}
+
+void stergereHT(HashTable* ht, int id) {
+    int poz       = hashFunctie(id);
+    NodHash* cur  = ht->sloturi[poz];
+    NodHash* prev = NULL;
+    while (cur) {
+        if (cur->info.id == id) {
+            if (prev) prev->next       = cur->next;
+            else      ht->sloturi[poz] = cur->next;
+            freeStudent(&cur->info);
+            free(cur);
+            ht->nrElemente--;
+            return;
+        }
+        prev = cur;
+        cur  = cur->next;
+    }
+    printf("  Student cu ID %d nu a fost gasit.\n", id);
+}
+
+void afisareHT(HashTable* ht) {
+    printf("  [HashTable — %d studenti, %d sloturi]\n", ht->nrElemente, HASH_SIZE);
+    for (int i = 0; i < HASH_SIZE; i++) {
+        printf("  Slot %2d: ", i);
+        NodHash* cur = ht->sloturi[i];
+        if (!cur) { printf("(gol)\n"); continue; }
+        while (cur) {
+            printf("[ID:%d, %s, %.2f]", cur->info.id, cur->info.nume, cur->info.medie);
+            if (cur->next) printf(" -> ");
+            cur = cur->next;
+        }
+        printf("\n");
+    }
+}
+
+void afisareBursieri(HashTable* ht, float pragBursa) {
+    printf("  [Studenti cu medie >= %.2f]\n", pragBursa);
+    for (int i = 0; i < HASH_SIZE; i++) {
+        NodHash* cur = ht->sloturi[i];
+        while (cur) {
+            if (cur->info.medie >= pragBursa) afisareStudent(cur->info);
+            cur = cur->next;
+        }
+    }
+}
+
+void dezalocareHT(HashTable* ht) {
+    for (int i = 0; i < HASH_SIZE; i++) {
+        NodHash* cur = ht->sloturi[i];
+        while (cur) {
+            NodHash* aux = cur;
+            cur = cur->next;
+            freeStudent(&aux->info);
+            free(aux);
+        }
+        ht->sloturi[i] = NULL;
+    }
+    ht->nrElemente = 0;
+}
+
+
+int main(void) {
+    Student s1 = initStudent(5,  "Andrei Pop",      1040, 9.50f);
+    Student s2 = initStudent(2,  "Maria Ion",       1041, 8.75f);
+    Student s3 = initStudent(8,  "Cosmin Radu",     1040, 7.20f);
+    Student s4 = initStudent(1,  "Elena Georgescu", 1042, 6.80f);
+    Student s5 = initStudent(10, "Mihai Stan",      1041, 9.80f);
+    Student s6 = initStudent(3,  "Ana Dumitru",     1042, 5.40f);
+    Student s7 = initStudent(7,  "Paul Neagu",      1040, 8.10f);
+
+    printf("\n=== HEAP (Max-Heap dupa medie) ===\n");
+    Heap h = initHeap();
+    inserareHeap(&h, s1); inserareHeap(&h, s2); inserareHeap(&h, s3);
+    inserareHeap(&h, s4); inserareHeap(&h, s5); inserareHeap(&h, s6);
+    inserareHeap(&h, s7);
+    printf("\nContinut heap:\n");         afisareHeap(&h);
+    printf("\nTop 3 studenti:\n");        afisareTopK(h, 3);
+    printf("\nExtragere maxim:\n  ");
+    Student maxim = extrageMaxim(&h);     afisareStudent(maxim);
+    printf("\nHeap dupa extragere:\n");   afisareHeap(&h);
+    dezalocareHeap(&h);
+
+    printf("\n=== ARBORE BINAR DE CAUTARE (dupa ID) ===\n");
+    NodABC* arbore = NULL;
+    inserareABC(&arbore, initStudent(5,  "Andrei Pop",      1040, 9.50f));
+    inserareABC(&arbore, initStudent(2,  "Maria Ion",       1041, 8.75f));
+    inserareABC(&arbore, initStudent(8,  "Cosmin Radu",     1040, 7.20f));
+    inserareABC(&arbore, initStudent(1,  "Elena Georgescu", 1042, 6.80f));
+    inserareABC(&arbore, initStudent(10, "Mihai Stan",      1041, 9.80f));
+    inserareABC(&arbore, initStudent(3,  "Ana Dumitru",     1042, 5.40f));
+    inserareABC(&arbore, initStudent(7,  "Paul Neagu",      1040, 8.10f));
+    printf("\nInordine:\n");              inordineABC(arbore);
+    printf("\nPreordine:\n");             preordineABC(arbore);
+    printf("\nCautare ID=8:\n");
+    NodABC* gasit = cautareABC(arbore, 8);
+    if (gasit) afisareStudent(gasit->info); else printf("  Nu gasit.\n");
+    printf("\nStudenti grupa 1040:\n");   studentiDinGrupa(arbore, 1040);
+    printf("\nNr. studenti  : %d\n",      numarNoduri(arbore));
+    printf("Media generala: %.2f\n",      mediaGenerala(arbore));
+    printf("Promovati(>=5): %d\n",        numarStudentiCuMedieMinima(arbore, 5.0f));
+    printf("\nDupa stergere ID=5:\n");
+    arbore = stergeNod(arbore, 5);        inordineABC(arbore);
+    dezalocareABC(&arbore);
+
+    printf("\n=== ARBORE AVL (auto-balansat, dupa ID) ===\n");
+    NodAVL* avl = NULL;
+    inserareAVL(&avl, initStudent(5,  "Andrei Pop",      1040, 9.50f));
+    inserareAVL(&avl, initStudent(2,  "Maria Ion",       1041, 8.75f));
+    inserareAVL(&avl, initStudent(8,  "Cosmin Radu",     1040, 7.20f));
+    inserareAVL(&avl, initStudent(1,  "Elena Georgescu", 1042, 6.80f));
+    inserareAVL(&avl, initStudent(10, "Mihai Stan",      1041, 9.80f));
+    inserareAVL(&avl, initStudent(3,  "Ana Dumitru",     1042, 5.40f));
+    inserareAVL(&avl, initStudent(7,  "Paul Neagu",      1040, 8.10f));
+    printf("\nInordine AVL:\n");          inordineAVL(avl);
+    printf("\nInaltime AVL: %d\n",        inaltimeAVL(avl));
+    printf("\nCautare ID=3:\n");
+    NodAVL* gasitAVL = cautareAVL(avl, 3);
+    if (gasitAVL) afisareStudent(gasitAVL->info); else printf("  Nu gasit.\n");
+    printf("\nStudenti medie 7-9: %d\n",  studentiInInterval(avl, 7.0f, 9.0f));
+    dezalocareAVL(&avl);
+
+    printf("\n=== HASHTABLE (chaining, cheie = id %% %d) ===\n", HASH_SIZE);
+    HashTable ht = initHashTable();
+    inserareHT(&ht, initStudent(5,  "Andrei Pop",      1040, 9.50f));
+    inserareHT(&ht, initStudent(2,  "Maria Ion",       1041, 8.75f));
+    inserareHT(&ht, initStudent(18, "Cosmin Radu",     1040, 7.20f));
+    inserareHT(&ht, initStudent(1,  "Elena Georgescu", 1042, 6.80f));
+    inserareHT(&ht, initStudent(10, "Mihai Stan",      1041, 9.80f));
+    inserareHT(&ht, initStudent(3,  "Ana Dumitru",     1042, 5.40f));
+    inserareHT(&ht, initStudent(7,  "Paul Neagu",      1040, 8.10f));
+    printf("\nContinut hashtable:\n");    afisareHT(&ht);
+    printf("\nCautare ID=18:\n");
+    Student* cautat = cautareHT(&ht, 18);
+    if (cautat) afisareStudent(*cautat); else printf("  Nu gasit.\n");
+    printf("\nBursieri (medie>=9.00):\n"); afisareBursieri(&ht, 9.0f);
+    printf("\nDupa stergere ID=2:\n");
+    stergereHT(&ht, 2);                  afisareHT(&ht);
+    dezalocareHT(&ht);
+
+    printf("\n=== Done! ===\n");
+    return 0;
+}
