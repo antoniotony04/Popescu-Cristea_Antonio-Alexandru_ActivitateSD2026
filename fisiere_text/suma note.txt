@@ -1,0 +1,17 @@
+#include <stdio.h>
+
+int main() {
+    FILE* f = fopen("date.txt", "r");
+    char nume[50];
+    int nota, suma = 0, cnt = 0;
+
+    while (fscanf(f, "%s %d", nume, &nota) != EOF) {
+        suma += nota;
+        cnt++;
+    }
+
+    fclose(f);
+    if (cnt > 0)
+        printf("%.2f", (float)suma / cnt);
+    return 0;
+}

@@ -1,0 +1,15 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    FILE* f = fopen("vector.bin", "rb");
+    int n;
+    fread(&n, sizeof(int), 1, f);
+    int* v = (int*)malloc(n * sizeof(int));
+    fread(v, sizeof(int), n, f);
+    for (int i = 0; i < n; i++)
+        printf("%d ", v[i]);
+    fclose(f);
+    free(v);
+    return 0;
+}

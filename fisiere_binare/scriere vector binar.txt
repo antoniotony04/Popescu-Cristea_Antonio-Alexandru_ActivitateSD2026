@@ -1,0 +1,11 @@
+#include <stdio.h>
+
+int main() {
+    int v[] = {10, 20, 30, 40, 50};
+    int n = 5;
+    FILE* f = fopen("vector.bin", "wb");
+    fwrite(&n, sizeof(int), 1, f);
+    fwrite(v, sizeof(int), n, f);
+    fclose(f);
+    return 0;
+}

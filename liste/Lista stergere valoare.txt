@@ -1,0 +1,54 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Nod {
+    int data;
+    struct Nod* next;
+} Nod;
+
+Nod* inserareSfarsit(Nod* head, int val) {
+    Nod* nou = (Nod*)malloc(sizeof(Nod));
+    nou->data = val;
+    nou->next = NULL;
+    if (head == NULL) return nou;
+    Nod* temp = head;
+    while (temp->next != NULL)
+        temp = temp->next;
+    temp->next = nou;
+    return head;
+}
+
+Nod* stergeValoare(Nod* head, int val) {
+    if (head == NULL) return NULL;
+    if (head->data == val) {
+        Nod* aux = head->next;
+        free(head);
+        return aux;
+    }
+    Nod* temp = head;
+    while (temp->next != NULL && temp->next->data != val)
+        temp = temp->next;
+    if (temp->next != NULL) {
+        Nod* aux = temp->next;
+        temp->next = aux->next;
+        free(aux);
+    }
+    return head;
+}
+
+void afisare(Nod* head) {
+    while (head != NULL) {
+        printf("%d ", head->data);
+        head = head->next;
+    }
+}
+
+int main() {
+    Nod* lista = NULL;
+    lista = inserareSfarsit(lista, 10);
+    lista = inserareSfarsit(lista, 20);
+    lista = inserareSfarsit(lista, 30);
+    lista = stergeValoare(lista, 20);
+    afisare(lista);
+    return 0;
+}

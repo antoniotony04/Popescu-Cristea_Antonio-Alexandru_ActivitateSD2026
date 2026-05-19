@@ -1,0 +1,32 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Nod {
+    int val;
+    struct Nod* st;
+    struct Nod* dr;
+} Nod;
+
+Nod* creare(int val) {
+    Nod* n = (Nod*)malloc(sizeof(Nod));
+    n->val = val;
+    n->st = n->dr = NULL;
+    return n;
+}
+
+int inaltime(Nod* rad) {
+    if (!rad) return 0;
+    int hSt = inaltime(rad->st);
+    int hDr = inaltime(rad->dr);
+    return 1 + (hSt > hDr ? hSt : hDr);
+}
+
+int main() {
+    Nod* rad = creare(1);
+    rad->st = creare(2);
+    rad->dr = creare(3);
+    rad->st->st = creare(4);
+    rad->st->dr = creare(5);
+    printf("%d", inaltime(rad));
+    return 0;
+}

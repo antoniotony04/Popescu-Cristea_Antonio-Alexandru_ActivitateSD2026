@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Nod {
+    int val;
+    struct Nod* st;
+    struct Nod* dr;
+} Nod;
+
+#define MAX 100
+
+Nod* creare(int val) {
+    Nod* n = (Nod*)malloc(sizeof(Nod));
+    n->val = val;
+    n->st = n->dr = NULL;
+    return n;
+}
+
+void peNiveluri(Nod* rad) {
+    if (!rad) return;
+    Nod* q[MAX];
+    int front = 0, rear = 0;
+    q[rear++] = rad;
+    while (front < rear) {
+        Nod* cur = q[front++];
+        printf("%d ", cur->val);
+        if (cur->st) q[rear++] = cur->st;
+        if (cur->dr) q[rear++] = cur->dr;
+    }
+}
+
+int main() {
+    Nod* rad = creare(1);
+    rad->st = creare(2);
+    rad->dr = creare(3);
+    rad->st->st = creare(4);
+    rad->st->dr = creare(5);
+    peNiveluri(rad);
+    return 0;
+}

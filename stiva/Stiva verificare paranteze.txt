@@ -1,0 +1,35 @@
+#include <stdio.h>
+#define MAX 100
+
+char stack[MAX];
+int top = -1;
+
+void push(char c) {
+    stack[++top] = c;
+}
+
+char pop() {
+    if (top == -1) return 0;
+    return stack[top--];
+}
+
+int esteValid(char* s) {
+    for (int i = 0; s[i] != '\0'; i++) {
+        if (s[i] == '(' || s[i] == '[' || s[i] == '{')
+            push(s[i]);
+        else if (s[i] == ')' || s[i] == ']' || s[i] == '}') {
+            if (top == -1) return 0;
+            char c = pop();
+            if (s[i] == ')' && c != '(') return 0;
+            if (s[i] == ']' && c != '[') return 0;
+            if (s[i] == '}' && c != '{') return 0;
+        }
+    }
+    return top == -1;
+}
+
+int main() {
+    printf("%d\n", esteValid("({[]})"));
+    printf("%d\n", esteValid("([)]"));
+    return 0;
+}

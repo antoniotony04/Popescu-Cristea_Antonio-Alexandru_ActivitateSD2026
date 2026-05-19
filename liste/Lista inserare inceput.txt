@@ -1,0 +1,30 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Nod {
+    int data;
+    struct Nod* next;
+} Nod;
+
+Nod* inserareInceput(Nod* head, int val) {
+    Nod* nou = (Nod*)malloc(sizeof(Nod));
+    nou->data = val;
+    nou->next = head;
+    return nou;
+}
+
+void afisare(Nod* head) {
+    while (head != NULL) {
+        printf("%d ", head->data);
+        head = head->next;
+    }
+}
+
+int main() {
+    Nod* lista = NULL;
+    lista = inserareInceput(lista, 30);
+    lista = inserareInceput(lista, 20);
+    lista = inserareInceput(lista, 10);
+    afisare(lista);
+    return 0;
+}

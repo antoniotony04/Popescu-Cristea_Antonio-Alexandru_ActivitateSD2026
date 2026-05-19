@@ -1,0 +1,33 @@
+#include <stdio.h>
+
+#define N 5
+
+int graf[N][N] = {
+    {0,1,1,0,0},
+    {1,0,0,1,0},
+    {1,0,0,1,1},
+    {0,1,1,0,1},
+    {0,0,1,1,0}
+};
+
+void dfs(int start) {
+    int viz[N] = {0};
+    int st[N], top = 0;
+    st[top++] = start;
+    viz[start] = 1;
+
+    while (top > 0) {
+        int x = st[--top];
+        printf("%d ", x);
+        for (int i = N - 1; i >= 0; i--)
+            if (graf[x][i] && !viz[i]) {
+                viz[i] = 1;
+                st[top++] = i;
+            }
+    }
+}
+
+int main() {
+    dfs(0);
+    return 0;
+}

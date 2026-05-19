@@ -1,0 +1,21 @@
+#include <stdio.h>
+#include <ctype.h>
+
+int main() {
+    FILE* f = fopen("date.txt", "r");
+    char c;
+    int cuvinte = 0, inCuvant = 0;
+
+    while ((c = fgetc(f)) != EOF) {
+        if (isspace(c)) {
+            inCuvant = 0;
+        } else if (!inCuvant) {
+            inCuvant = 1;
+            cuvinte++;
+        }
+    }
+
+    fclose(f);
+    printf("%d", cuvinte);
+    return 0;
+}

@@ -1,0 +1,38 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Nod {
+    int data;
+    struct Nod* next;
+    struct Nod* prev;
+} Nod;
+
+void inserareSfarsit(Nod** first, Nod** last, int val) {
+    Nod* nou = (Nod*)malloc(sizeof(Nod));
+    nou->data = val;
+    nou->next = NULL;
+    nou->prev = *last;
+    if (*last == NULL)
+        *first = *last = nou;
+    else {
+        (*last)->next = nou;
+        *last = nou;
+    }
+}
+
+void afisareInainte(Nod* first) {
+    while (first != NULL) {
+        printf("%d ", first->data);
+        first = first->next;
+    }
+}
+
+int main() {
+    Nod* first = NULL;
+    Nod* last = NULL;
+    inserareSfarsit(&first, &last, 10);
+    inserareSfarsit(&first, &last, 20);
+    inserareSfarsit(&first, &last, 30);
+    afisareInainte(first);
+    return 0;
+}
