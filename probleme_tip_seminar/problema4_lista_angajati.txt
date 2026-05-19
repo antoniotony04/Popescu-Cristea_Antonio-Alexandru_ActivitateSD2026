@@ -1,0 +1,130 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+	int id;
+	char* nume;
+	char* departament;
+	float salariu;
+} Angajat;
+
+typedef struct Nod {
+	Angajat info;
+	struct Nod* next;
+} Nod;
+
+Angajat citireAngajat(FILE* f) {
+	char buffer[150];
+	char sep[] = ",\n";
+	Angajat a = {0, NULL, NULL, 0};
+	if (!fgets(buffer, 150, f)) return a;
+	char* tok = strtok(buffer, sep);
+	if (!tok) return a;
+	a.id = atoi(tok);
+	tok = strtok(NULL, sep);
+	a.nume = (char*)malloc(strlen(tok) + 1);
+	strcpy(a.nume, tok);
+	tok = strtok(NULL, sep);
+	a.departament = (char*)malloc(strlen(tok) + 1);
+	strcpy(a.departament, tok);
+	a.salariu = (float)atof(strtok(NULL, sep));
+	return a;
+}
+
+void adaugaLaSfarsit(Nod** lista, Angajat a) {
+	Nod* nou = (Nod*)malloc(sizeof(Nod));
+	nou->info = a;
+	nou->next = NULL;
+	if (!*lista) {
+		*lista = nou;
+		return;
+	}
+	Nod* p = *lista;
+	while (p->next) p = p->next;
+	p->next = nou;
+}
+
+Nod* citireLista(const char* fisier) {
+	FILE* f = fopen(fisier, "r");
+	Nod* lista = NULL;
+	if (!f) return NULL;
+	while (!feof(f)) {
+		Angajat a = citireAngajat(f);
+		if (a.id != 0)
+			adaugaLaSfarsit(&lista, a);
+	}
+	fclose(f);
+	return lista;
+}
+
+float salariuMediuDepartament(Nod* lista, const char* departament) {
+	float suma = 0;
+	int n = 0;
+	while (lista) {
+		if (strcmp(lista->info.departament, departament) == 0) {
+			suma += lista->info.salariu;
+			n++;
+		}
+		lista = lista->next;
+	}
+	return n == 0 ? 0 : suma / n;
+}
+
+float sumaSalarii(Nod* lista) {
+	float suma = 0;
+	while (lista) {
+		suma += lista->info.salariu;
+		lista = lista->next;
+	}
+	return suma;
+}
+
+void stergeDepartament(Nod** lista, const char* departament) {
+	while (*lista && strcmp((*lista)->info.departament, departament) == 0) {
+		Nod* p = *lista;
+		*lista = (*lista)->next;
+		free(p->info.nume);
+		free(p->info.departament);
+		free(p);
+	}
+	if (!*lista) return;
+	Nod* p = *lista;
+	while (p->next) {
+		if (strcmp(p->next->info.departament, departament) == 0) {
+			Nod* sters = p->next;
+			p->next = sters->next;
+			free(sters->info.nume);
+			free(sters->info.departament);
+			free(sters);
+		}
+		else {
+			p = p->next;
+		}
+	}
+}
+
+void dezalocare(Nod** lista) {
+	while (*lista) {
+		free((*lista)->info.nume);
+		free((*lista)->info.departament);
+		Nod* p = *lista;
+		*lista = (*lista)->next;
+		free(p);
+	}
+}
+
+int main() {
+	Nod* lista = citireLista("angajati.txt");
+	printf("Salariu mediu IT: %.2f\n", salariuMediuDepartament(lista, "IT"));
+	printf("Suma salarii: %.2f\n", sumaSalarii(lista));
+	stergeDepartament(&lista, "HR");
+	Nod* p = lista;
+	while (p) {
+		printf("%s %s %.2f\n", p->info.nume, p->info.departament, p->info.salariu);
+		p = p->next;
+	}
+	dezalocare(&lista);
+	return 0;
+}

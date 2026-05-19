@@ -1,0 +1,5 @@
+1,Laptop,Electronice,3500.0
+2,Mouse,Electronice,120.0
+3,Birou,Mobila,800.0
+4,Monitor,Electronice,1200.0
+5,Scaun,Mobila,450.0

@@ -1,0 +1,129 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+	int id;
+	char* titlu;
+	char* autor;
+	float pret;
+} Carte;
+
+typedef struct Nod {
+	Carte info;
+	struct Nod* next;
+} Nod;
+
+Carte citireCarte(FILE* f) {
+	char buffer[150];
+	char sep[] = ",\n";
+	Carte c = {0, NULL, NULL, 0};
+	if (!fgets(buffer, 150, f)) return c;
+	char* tok = strtok(buffer, sep);
+	if (!tok) return c;
+	c.id = atoi(tok);
+	tok = strtok(NULL, sep);
+	c.titlu = (char*)malloc(strlen(tok) + 1);
+	strcpy(c.titlu, tok);
+	tok = strtok(NULL, sep);
+	c.autor = (char*)malloc(strlen(tok) + 1);
+	strcpy(c.autor, tok);
+	c.pret = (float)atof(strtok(NULL, sep));
+	return c;
+}
+
+void adaugaLaSfarsit(Nod** lista, Carte c) {
+	Nod* nou = (Nod*)malloc(sizeof(Nod));
+	nou->info = c;
+	nou->next = NULL;
+	if (!*lista) {
+		*lista = nou;
+		return;
+	}
+	Nod* p = *lista;
+	while (p->next) p = p->next;
+	p->next = nou;
+}
+
+Nod* citireLista(const char* fisier) {
+	FILE* f = fopen(fisier, "r");
+	Nod* lista = NULL;
+	if (!f) return NULL;
+	while (!feof(f)) {
+		Carte c = citireCarte(f);
+		if (c.id != 0)
+			adaugaLaSfarsit(&lista, c);
+	}
+	fclose(f);
+	return lista;
+}
+
+float valoareTotala(Nod* lista) {
+	float suma = 0;
+	while (lista) {
+		suma += lista->info.pret;
+		lista = lista->next;
+	}
+	return suma;
+}
+
+void stergeCartiAutor(Nod** lista, const char* autor) {
+	while (*lista && strcmp((*lista)->info.autor, autor) == 0) {
+		Nod* p = *lista;
+		*lista = (*lista)->next;
+		free(p->info.titlu);
+		free(p->info.autor);
+		free(p);
+	}
+	if (!*lista) return;
+	Nod* p = *lista;
+	while (p->next) {
+		if (strcmp(p->next->info.autor, autor) == 0) {
+			Nod* sters = p->next;
+			p->next = sters->next;
+			free(sters->info.titlu);
+			free(sters->info.autor);
+			free(sters);
+		}
+		else {
+			p = p->next;
+		}
+	}
+}
+
+Carte* cautareDupaTitlu(Nod* lista, const char* titlu) {
+	while (lista) {
+		if (strcmp(lista->info.titlu, titlu) == 0)
+			return &lista->info;
+		lista = lista->next;
+	}
+	return NULL;
+}
+
+void dezalocare(Nod** lista) {
+	while (*lista) {
+		free((*lista)->info.titlu);
+		free((*lista)->info.autor);
+		Nod* p = *lista;
+		*lista = (*lista)->next;
+		free(p);
+	}
+}
+
+int main() {
+	Nod* lista = citireLista("carti.txt");
+	printf("Valoare totala: %.2f\n", valoareTotala(lista));
+	Carte* gasita = cautareDupaTitlu(lista, "Ion");
+	if (gasita)
+		printf("Gasit: %s %.2f\n", gasita->autor, gasita->pret);
+	stergeCartiAutor(&lista, "Orwell");
+	printf("Dupa stergere Orwell:\n");
+	Nod* p = lista;
+	while (p) {
+		printf("%s - %.2f\n", p->info.titlu, p->info.pret);
+		p = p->next;
+	}
+	dezalocare(&lista);
+	return 0;
+}

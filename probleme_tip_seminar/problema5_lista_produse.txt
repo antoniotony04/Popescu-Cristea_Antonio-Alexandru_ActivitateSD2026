@@ -1,0 +1,111 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+	int id;
+	char* denumire;
+	char* categorie;
+	float pret;
+} Produs;
+
+typedef struct Nod {
+	Produs info;
+	struct Nod* next;
+} Nod;
+
+Produs citireProdus(FILE* f) {
+	char buffer[150];
+	char sep[] = ",\n";
+	Produs p = {0, NULL, NULL, 0};
+	if (!fgets(buffer, 150, f)) return p;
+	char* tok = strtok(buffer, sep);
+	if (!tok) return p;
+	p.id = atoi(tok);
+	tok = strtok(NULL, sep);
+	p.denumire = (char*)malloc(strlen(tok) + 1);
+	strcpy(p.denumire, tok);
+	tok = strtok(NULL, sep);
+	p.categorie = (char*)malloc(strlen(tok) + 1);
+	strcpy(p.categorie, tok);
+	p.pret = (float)atof(strtok(NULL, sep));
+	return p;
+}
+
+void adaugaLaSfarsit(Nod** lista, Produs p) {
+	Nod* nou = (Nod*)malloc(sizeof(Nod));
+	nou->info = p;
+	nou->next = NULL;
+	if (!*lista) {
+		*lista = nou;
+		return;
+	}
+	Nod* cur = *lista;
+	while (cur->next) cur = cur->next;
+	cur->next = nou;
+}
+
+Nod* citireLista(const char* fisier) {
+	FILE* f = fopen(fisier, "r");
+	Nod* lista = NULL;
+	if (!f) return NULL;
+	while (!feof(f)) {
+		Produs p = citireProdus(f);
+		if (p.id != 0)
+			adaugaLaSfarsit(&lista, p);
+	}
+	fclose(f);
+	return lista;
+}
+
+int numaraProdusePestePret(Nod* lista, float prag) {
+	int n = 0;
+	while (lista) {
+		if (lista->info.pret > prag) n++;
+		lista = lista->next;
+	}
+	return n;
+}
+
+void afisareCategorie(Nod* lista, const char* categorie) {
+	while (lista) {
+		if (strcmp(lista->info.categorie, categorie) == 0)
+			printf("%s %.2f\n", lista->info.denumire, lista->info.pret);
+		lista = lista->next;
+	}
+}
+
+float pretMaximCategorie(Nod* lista, const char* categorie) {
+	float max = 0;
+	int gasit = 0;
+	while (lista) {
+		if (strcmp(lista->info.categorie, categorie) == 0) {
+			if (!gasit || lista->info.pret > max)
+				max = lista->info.pret;
+			gasit = 1;
+		}
+		lista = lista->next;
+	}
+	return gasit ? max : 0;
+}
+
+void dezalocare(Nod** lista) {
+	while (*lista) {
+		free((*lista)->info.denumire);
+		free((*lista)->info.categorie);
+		Nod* p = *lista;
+		*lista = (*lista)->next;
+		free(p);
+	}
+}
+
+int main() {
+	Nod* lista = citireLista("produse.txt");
+	printf("Produse peste 1000: %d\n", numaraProdusePestePret(lista, 1000.0f));
+	printf("Electronice:\n");
+	afisareCategorie(lista, "Electronice");
+	printf("Pret maxim Mobila: %.2f\n", pretMaximCategorie(lista, "Mobila"));
+	dezalocare(&lista);
+	return 0;
+}

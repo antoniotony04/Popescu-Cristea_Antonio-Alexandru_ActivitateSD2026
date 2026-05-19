@@ -1,0 +1,122 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+	int id;
+	char* nume;
+	int grupa;
+	float medie;
+} Student;
+
+typedef struct Nod {
+	Student info;
+	struct Nod* next;
+} Nod;
+
+Student citireStudent(FILE* f) {
+	char buffer[100];
+	char sep[] = ",\n";
+	Student s = {0, NULL, 0, 0};
+	if (!fgets(buffer, 100, f)) return s;
+	char* tok = strtok(buffer, sep);
+	if (!tok) return s;
+	s.id = atoi(tok);
+	tok = strtok(NULL, sep);
+	s.nume = (char*)malloc(strlen(tok) + 1);
+	strcpy(s.nume, tok);
+	s.grupa = atoi(strtok(NULL, sep));
+	s.medie = (float)atof(strtok(NULL, sep));
+	return s;
+}
+
+void afisareStudent(Student s) {
+	printf("%d %s %d %.2f\n", s.id, s.nume, s.grupa, s.medie);
+}
+
+void adaugaLaSfarsit(Nod** lista, Student s) {
+	Nod* nou = (Nod*)malloc(sizeof(Nod));
+	nou->info = s;
+	nou->next = NULL;
+	if (!*lista) {
+		*lista = nou;
+		return;
+	}
+	Nod* p = *lista;
+	while (p->next) p = p->next;
+	p->next = nou;
+}
+
+void adaugaLaInceput(Nod** lista, Student s) {
+	Nod* nou = (Nod*)malloc(sizeof(Nod));
+	nou->info = s;
+	nou->next = *lista;
+	*lista = nou;
+}
+
+Nod* citireLista(const char* fisier) {
+	FILE* f = fopen(fisier, "r");
+	Nod* lista = NULL;
+	if (!f) return NULL;
+	while (!feof(f)) {
+		Student s = citireStudent(f);
+		if (s.id != 0)
+			adaugaLaSfarsit(&lista, s);
+	}
+	fclose(f);
+	return lista;
+}
+
+int numaraStudentiGrupa(Nod* lista, int grupa) {
+	int n = 0;
+	while (lista) {
+		if (lista->info.grupa == grupa) n++;
+		lista = lista->next;
+	}
+	return n;
+}
+
+void stergeStudentiSubMedie(Nod** lista, float prag) {
+	while (*lista && (*lista)->info.medie < prag) {
+		Nod* p = *lista;
+		*lista = (*lista)->next;
+		free(p->info.nume);
+		free(p);
+	}
+	if (!*lista) return;
+	Nod* p = *lista;
+	while (p->next) {
+		if (p->next->info.medie < prag) {
+			Nod* sters = p->next;
+			p->next = sters->next;
+			free(sters->info.nume);
+			free(sters);
+		}
+		else {
+			p = p->next;
+		}
+	}
+}
+
+void dezalocare(Nod** lista) {
+	while (*lista) {
+		free((*lista)->info.nume);
+		Nod* p = *lista;
+		*lista = (*lista)->next;
+		free(p);
+	}
+}
+
+int main() {
+	Nod* lista = citireLista("studenti.txt");
+	printf("Studenti grupa 1040: %d\n", numaraStudentiGrupa(lista, 1040));
+	stergeStudentiSubMedie(&lista, 7.0f);
+	Nod* p = lista;
+	while (p) {
+		afisareStudent(p->info);
+		p = p->next;
+	}
+	dezalocare(&lista);
+	return 0;
+}

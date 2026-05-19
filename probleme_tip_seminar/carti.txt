@@ -1,0 +1,5 @@
+1,1984,Orwell,45.50
+2,Morometii,Preda,32.00
+3,Ion,Eliade,28.90
+4,Enigma Otiliei,Bogdan,35.00
+5,1984,Orwell,42.00

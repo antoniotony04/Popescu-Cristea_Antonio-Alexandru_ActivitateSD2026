@@ -1,0 +1,5 @@
+1,Popescu,IT,5500.0
+2,Ionescu,HR,4200.0
+3,Marinescu,IT,6000.0
+4,Georgescu,Finante,4800.0
+5,Radu,IT,5200.0
