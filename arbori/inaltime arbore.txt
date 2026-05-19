@@ -22,11 +22,10 @@ int inaltime(Nod* rad) {
 }
 
 int main() {
-    Nod* rad = creare(1);
-    rad->st = creare(2);
-    rad->dr = creare(3);
-    rad->st->st = creare(4);
-    rad->st->dr = creare(5);
+    Nod* rad = creare(5);
+    rad->st = creare(3);
+    rad->dr = creare(7);
+    rad->st->st = creare(1);
     printf("%d", inaltime(rad));
     return 0;
 }

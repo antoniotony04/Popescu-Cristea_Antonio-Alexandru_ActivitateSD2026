@@ -7,32 +7,35 @@ typedef struct Nod {
     struct Nod* prev;
 } Nod;
 
-void inserareSfarsit(Nod** first, Nod** last, int val) {
+Nod* inserareSfarsit(Nod* head, int val) {
     Nod* nou = (Nod*)malloc(sizeof(Nod));
     nou->data = val;
     nou->next = NULL;
-    nou->prev = *last;
-    if (*last == NULL)
-        *first = *last = nou;
-    else {
-        (*last)->next = nou;
-        *last = nou;
-    }
+    nou->prev = NULL;
+
+    if (head == NULL) return nou;
+
+    Nod* temp = head;
+    while (temp->next != NULL)
+        temp = temp->next;
+
+    temp->next = nou;
+    nou->prev = temp;
+    return head;
 }
 
-void afisareInainte(Nod* first) {
-    while (first != NULL) {
-        printf("%d ", first->data);
-        first = first->next;
+void afisare(Nod* head) {
+    while (head != NULL) {
+        printf("%d ", head->data);
+        head = head->next;
     }
 }
 
 int main() {
-    Nod* first = NULL;
-    Nod* last = NULL;
-    inserareSfarsit(&first, &last, 10);
-    inserareSfarsit(&first, &last, 20);
-    inserareSfarsit(&first, &last, 30);
-    afisareInainte(first);
+    Nod* lista = NULL;
+    lista = inserareSfarsit(lista, 1);
+    lista = inserareSfarsit(lista, 2);
+    lista = inserareSfarsit(lista, 3);
+    afisare(lista);
     return 0;
 }

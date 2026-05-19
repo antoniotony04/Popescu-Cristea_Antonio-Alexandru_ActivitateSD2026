@@ -1,0 +1,32 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Nod {
+    int val;
+    struct Nod* st;
+    struct Nod* dr;
+} Nod;
+
+Nod* creare(int val) {
+    Nod* n = (Nod*)malloc(sizeof(Nod));
+    n->val = val;
+    n->st = n->dr = NULL;
+    return n;
+}
+
+void postorder(Nod* rad) {
+    if (rad) {
+        postorder(rad->st);
+        postorder(rad->dr);
+        printf("%d ", rad->val);
+    }
+}
+
+int main() {
+    Nod* rad = creare(1);
+    rad->st = creare(2);
+    rad->dr = creare(3);
+    rad->st->st = creare(4);
+    postorder(rad);
+    return 0;
+}
